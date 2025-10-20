@@ -5,11 +5,11 @@ from uuid import UUID
 
 from marshmallow import EXCLUDE, ValidationError, fields, post_dump, pre_load
 
-from core.serialization.base import BaseSchema
+from core.serialization.base import BaseModelSchema
 
 T = TypeVar("T")
 
-class VersionedSchema(BaseSchema):
+class VersionedSchema(BaseModelSchema):
     """Schema with version tracking for safe migrations."""
 
     __version__ = "1.0.0"
@@ -17,6 +17,8 @@ class VersionedSchema(BaseSchema):
     class Meta:
         """Schema metadata."""
         unknown = EXCLUDE
+        load_instance = True
+        include_relationships = True
 
     schema_version = fields.String(dump_default=__version__)
 

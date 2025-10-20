@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from typing import Generator
 
-from core.serialization.base import BaseModel
+from database.models.base import Base
 from database.models.category import Category
 from database.models.flash_card import FlashCard
 
@@ -18,7 +18,7 @@ def engine():
         SQLAlchemy engine instance
     """
     engine = create_engine("sqlite:///:memory:")
-    BaseModel.metadata.create_all(engine)
+    Base.metadata.create_all(engine)
     return engine
 
 
@@ -43,17 +43,21 @@ def db_session(engine) -> Generator[Session, None, None]:
 
 
 @pytest.fixture
-def sample_category(db_session: Session) -> Category:
+def sample_category(db_session: Session, request: pytest.FixtureRequest) -> Category:
     """Create a sample category for testing.
     
     Args:
         db_session: SQLAlchemy session fixture
+        request: Pytest fixture request object for test context
         
     Returns:
         Category instance
     """
+    # Create a unique name using the test name
+    unique_name = f"Test Category - {request.node.name}"
+    
     category = Category(
-        name="Test Category",
+        name=unique_name,
         priority=1,
     )
     db_session.add(category)
@@ -62,20 +66,24 @@ def sample_category(db_session: Session) -> Category:
 
 
 @pytest.fixture
-def sample_flash_card(db_session: Session, sample_category: Category) -> FlashCard:
+def sample_flash_card(db_session: Session, sample_category: Category, request: pytest.FixtureRequest) -> FlashCard:
     """Create a sample flash card for testing.
     
     Args:
         db_session: SQLAlchemy session fixture
         sample_category: Category fixture
+        request: Pytest fixture request object for test context
         
     Returns:
         FlashCard instance
     """
+    # Create a unique name using the test name
+    unique_name = f"Test Card - {request.node.name}"
+    
     card = FlashCard(
-        name="Test Card",
-        question="What is the test question?",
-        answer="This is the test answer",
+        name=unique_name,
+        question=f"What is the test question for {request.node.name}?",
+        answer=f"This is the test answer for {request.node.name}",
         category_uuid=sample_category.uuid,
     )
     db_session.add(card)

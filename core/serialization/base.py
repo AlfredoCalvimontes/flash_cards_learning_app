@@ -5,7 +5,11 @@ from typing import Any, Dict, Optional, TypeVar
 from marshmallow import Schema, ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
-from database.models.base import BaseModel
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from database.models.base import BaseModel
+else:
+    BaseModel = Any  # Placeholder for runtime
 
 T = TypeVar("T", bound=BaseModel)  # Used for type hints in schema methods
 

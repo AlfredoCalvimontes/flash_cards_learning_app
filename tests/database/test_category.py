@@ -4,7 +4,8 @@ import pytest
 from datetime import datetime, timezone
 from uuid import UUID
 
-from database.models.category import Category, CategorySchema
+from database.models.category import Category
+from database.models.schemas import CategorySchema
 from marshmallow import ValidationError
 
 
@@ -93,40 +94,46 @@ class TestCategorySchema:
         flash_cards = result.get("flash_cards")
         assert isinstance(flash_cards, list)
 
-    def test_deserialize_valid_data(self):
+    def test_deserialize_valid_data(self, db_session):
         """Test deserializing valid JSON data to a category."""
         schema = CategorySchema()
         data = {
             "name": "New Category",
             "priority": 5,
         }
-        result = schema.load(data)
+        schema._session = db_session  # Set session for context manager
+        with schema.session_context():
+            result = schema.load(data)
 
         assert isinstance(result, Category)
         assert result.name == "New Category"
         assert result.priority == 5
 
-    def test_deserialize_invalid_data(self):
+    def test_deserialize_invalid_data(self, db_session):
         """Test validation errors for invalid data."""
         schema = CategorySchema()
+        schema._session = db_session  # Set session for context manager
         
         # Test missing required fields
         with pytest.raises(ValidationError) as exc_info:
-            schema.load({})
+            with schema.session_context():
+                schema.load({})
         assert "name" in exc_info.value.messages
         assert "priority" in exc_info.value.messages
 
         # Test invalid priority
         with pytest.raises(ValidationError) as exc_info:
-            schema.load({"name": "Test", "priority": 0})
+            with schema.session_context():
+                schema.load({"name": "Test", "priority": 0})
         assert "priority" in exc_info.value.messages
 
         # Test invalid name length
         with pytest.raises(ValidationError) as exc_info:
-            schema.load({"name": "", "priority": 1})
+            with schema.session_context():
+                schema.load({"name": "", "priority": 1})
         assert "name" in exc_info.value.messages
 
-    def test_schema_version_handling(self):
+    def test_schema_version_handling(self, db_session):
         """Test schema version handling in serialization."""
         schema = CategorySchema()
         category = Category(name="Test", priority=1)
@@ -136,6 +143,12 @@ class TestCategorySchema:
         assert result.get("schema_version") == schema.__version__
 
         # Test incompatible version
+        schema._session = db_session  # Set session for context manager
         with pytest.raises(ValidationError) as exc_info:
-            schema.load({"schema_version": "999.0.0", "name": "Test", "priority": 1})
-        assert "newer than supported" in str(exc_info.value)
+            with schema.session_context():
+                schema.load({
+                    "schema_version": "999.0.0", 
+                    "name": "Test", 
+                    "priority": 1
+                })
+        assert "Data schema version 999.0.0 is newer than supported 1.0.0" in str(exc_info.value)

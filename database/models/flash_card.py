@@ -1,18 +1,18 @@
-"""FlashCard model and schema definition."""
+"""FlashCard model definition."""
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING
 from uuid import UUID
 
-from marshmallow import fields, validate
 from sqlalchemy import CheckConstraint, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.serialization.json import UUIDField, VersionedSchema
 from database.models.base import BaseModel
-from database.models.category import Category
+
+if TYPE_CHECKING:
+    from database.models.category import Category
 
 
 class FlashCard(BaseModel):
@@ -50,7 +50,6 @@ class FlashCard(BaseModel):
     difficulty: Mapped[int] = mapped_column(
         default=5,
         nullable=False,
-        info={"validate": validate.Range(min=1, max=10)},
         init=False,  # Exclude from __init__
     )
     
@@ -102,57 +101,3 @@ class FlashCard(BaseModel):
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp to current UTC time."""
         self.updated_at = datetime.now(timezone.utc)
-
-
-class FlashCardSchema(VersionedSchema):
-    """Schema for serializing/deserializing FlashCard models."""
-
-    class Meta:
-        """Schema metadata."""
-        model = FlashCard
-        load_instance = True
-        include_relationships = True
-
-    # Primary fields
-    uuid = UUIDField(dump_only=True)
-    name = fields.String(
-        required=True,
-        validate=validate.Length(min=1, max=100),
-        error_messages={"required": "Name is required."},
-    )
-    question = fields.String(
-        required=True,
-        validate=validate.Length(min=1, max=1000),
-        error_messages={"required": "Question is required."},
-    )
-    answer = fields.String(
-        required=True,
-        validate=validate.Length(min=1, max=2000),
-        error_messages={"required": "Answer is required."},
-    )
-    
-    # Secondary fields
-    difficulty = fields.Integer(
-        required=True,
-        validate=validate.Range(min=1, max=10),
-        load_default=5,
-    )
-    active = fields.Boolean(load_default=True)
-    deleted = fields.Boolean(load_default=False)
-
-    # Timestamps
-    created_at = fields.DateTime(dump_only=True)
-    updated_at = fields.DateTime(dump_only=True)
-
-    # Relationships
-    category_uuid = UUIDField(required=True)
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Initialize the schema with version information.
-        
-        Args:
-            *args: Variable length argument list
-            **kwargs: Arbitrary keyword arguments
-        """
-        super().__init__(*args, **kwargs)
-        self.__version__ = "1.0.0"  # Initial schema version

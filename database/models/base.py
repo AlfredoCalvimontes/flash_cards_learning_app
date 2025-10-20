@@ -1,14 +1,14 @@
 """Base model definitions."""
 
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Dict
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, MetaData
 from sqlalchemy.orm import DeclarativeBase, Mapped, MappedAsDataclass, mapped_column
 
 # Define naming convention for constraints
-NAMING_CONVENTION: dict[str, Any] = {
+NAMING_CONVENTION: Dict[str, Any] = {
     "ix": "ix_%(column_0_label)s",  # Index
     "uq": "uq_%(table_name)s_%(column_0_name)s",  # Unique constraint
     "ck": "ck_%(table_name)s_%(constraint_name)s",  # Check constraint

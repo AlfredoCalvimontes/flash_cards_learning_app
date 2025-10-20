@@ -1,10 +1,11 @@
 """Unit tests for FlashCard model and schema."""
 
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime
 from uuid import UUID
 
-from database.models.flash_card import FlashCard, FlashCardSchema
+from database.models.flash_card import FlashCard
+from database.models.schemas import FlashCardSchema
 from marshmallow import ValidationError
 
 
@@ -139,7 +140,7 @@ class TestFlashCardSchema:
         assert "updated_at" in result
         assert "schema_version" in result
 
-    def test_deserialize_valid_data(self, sample_category):
+    def test_deserialize_valid_data(self, sample_category, db_session):
         """Test deserializing valid JSON data to a flash card."""
         schema = FlashCardSchema()
         data = {
@@ -149,7 +150,7 @@ class TestFlashCardSchema:
             "category_uuid": str(sample_category.uuid),
             "difficulty": 7,
         }
-        result = schema.load(data)
+        result = schema.load(data, session=db_session)
 
         assert isinstance(result, FlashCard)
         assert result.name == "New Card"
@@ -158,13 +159,13 @@ class TestFlashCardSchema:
         assert result.category_uuid == sample_category.uuid
         assert result.difficulty == 7
 
-    def test_deserialize_invalid_data(self, sample_category):
+    def test_deserialize_invalid_data(self, sample_category, db_session):
         """Test validation errors for invalid data."""
         schema = FlashCardSchema()
         
         # Test missing required fields
         with pytest.raises(ValidationError) as exc_info:
-            schema.load({})
+            schema.load({}, session=db_session)
         assert "name" in exc_info.value.messages
         assert "question" in exc_info.value.messages
         assert "answer" in exc_info.value.messages
@@ -178,7 +179,7 @@ class TestFlashCardSchema:
                 "answer": "Test",
                 "category_uuid": str(sample_category.uuid),
                 "difficulty": 11,
-            })
+            }, session=db_session)
         assert "difficulty" in exc_info.value.messages
 
         # Test invalid UUID format
@@ -188,10 +189,10 @@ class TestFlashCardSchema:
                 "question": "Test",
                 "answer": "Test",
                 "category_uuid": "not-a-uuid",
-            })
+            }, session=db_session)
         assert "category_uuid" in exc_info.value.messages
 
-    def test_schema_version_handling(self, sample_category):
+    def test_schema_version_handling(self, sample_category, db_session):
         """Test schema version handling in serialization."""
         schema = FlashCardSchema()
         card = FlashCard(
@@ -200,7 +201,7 @@ class TestFlashCardSchema:
             answer="Test",
             category_uuid=sample_category.uuid,
         )
-        
+
         result = schema.dump(card)
         assert isinstance(result, dict)  # Type guard for static analysis
         assert result.get("schema_version") == schema.__version__
@@ -213,4 +214,4 @@ class TestFlashCardSchema:
                 "question": "Test",
                 "answer": "Test",
                 "category_uuid": str(sample_category.uuid),
-            })
+            }, session=db_session)

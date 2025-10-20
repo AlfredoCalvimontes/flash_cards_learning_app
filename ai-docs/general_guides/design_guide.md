@@ -22,6 +22,7 @@ Separation of Concerns: Strictly adhere to an Model-View-Controller (MVC) or Mod
 - Session Management: Use SQLAlchemy's Sessionmaker to manage database sessions. Every block of database code (e.g., a query or an update) should use a session in a try...finally block to ensure it is correctly closed or rolled back and a context manager.
 - Transactions: Wrap data modification operations (INSERT, UPDATE, DELETE) within explicit transactions to maintain data integrity.
 - Initial Data: Include a function to check if the database file exists; if not, create it and populate it with initial schema/data using SQLAlchemy's Base.metadata.create_all(engine).
+- Make explicit relations and models to prevent circular dependencies.
 
 ### Serialization (Marshmallow)
 - Schema Organization: All schemas must be organized in a `schemas` module, with clear separation between model schemas and specialized schemas.
@@ -43,6 +44,7 @@ Separation of Concerns: Strictly adhere to an Model-View-Controller (MVC) or Mod
   - Cache schema instances where appropriate
   - Use schema-level options to optimize serialization
   - Consider partial loading for large datasets
+- Make explicit relations and models to prevent circular dependencies.
 
 4. Packaging and Distribution
 - PyInstaller Spec: When generating the build command or spec file (.spec), ensure the SQLite database file and any PySide/Qt plugins are correctly included using the --add-data or datas= array in the spec file.

@@ -35,18 +35,18 @@ Reference Documents:
 
 ## Phase 2: Database Implementation
 ### 2.1 Core Models & Serialization
-- [ ] Create database/models.py with base configuration
-- [ ] Implement core/serialization/base.py for serialization interfaces
-- [ ] Create serializers for different formats:
-  - [ ] JSON serializer with schema versioning
-  - [ ] CSV serializer with header mapping
-  - [ ] Binary serializer with compression
-- [ ] Implement FlashCard model with fields:
-  - [ ] UUID, name, question, answer
-  - [ ] difficulty, active status
-  - [ ] timestamps and category relation
-  - [ ] serialization methods
-- [ ] Implement Category model with serialization
+- [x] Create database/models.py with base configuration
+- [x] Implement core/serialization/base.py for serialization interfaces
+- [x] Create serializers for different formats:
+  - [x] JSON serializer with schema versioning
+  - [x] CSV serializer with header mapping
+  - [x] Binary serializer with compression
+- [x] Implement FlashCard model with fields:
+  - [x] UUID, name, question, answer
+  - [x] difficulty, active status
+  - [x] timestamps and category relation
+  - [x] serialization methods
+- [x] Implement Category model with serialization
 - [ ] Add unit tests for models and serialization
 - [ ] Create serialization format migration tools
 

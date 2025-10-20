@@ -4,6 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+marshmallow = "*"
+marshmallow-sqlalchemy = "*"
+flash-cards-learning-app = {file = ".", editable = true}
 
 [dev-packages]
 

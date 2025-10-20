@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from database import Base
+from core.serialization.base import BaseModel
 
 @pytest.fixture(scope="session")
 def temp_dir():
@@ -24,7 +24,7 @@ def test_db_path(temp_dir):
 def test_engine(test_db_path):
     """Create a test database engine."""
     engine = create_engine(f"sqlite:///{test_db_path}")
-    Base.metadata.create_all(engine)
+    BaseModel.metadata.create_all(engine)
     return engine
 
 @pytest.fixture

@@ -1,0 +1,17 @@
+# Core Dependencies
+PySide6>=6.5.0
+SQLAlchemy>=2.0.0
+python-dotenv>=1.0.0
+PyInstaller>=5.13.0
+
+# Development Dependencies
+pytest>=7.4.0
+pytest-qt>=4.2.0
+pytest-cov>=4.1.0
+black>=23.7.0
+flake8>=6.1.0
+isort>=5.12.0
+mypy>=1.4.0
+
+# Optional Dependencies
+python-dateutil>=2.8.2

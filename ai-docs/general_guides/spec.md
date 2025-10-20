@@ -91,13 +91,30 @@ Strict separation of Model (SQLAlchemy ORM, business logic), View (PySide6 widge
 
 ## 4. Data Handling & Serialization
 ### Data Model Serialization
-- All models support serialization to multiple formats:
-  - JSON: For API interactions and settings storage
-  - CSV: For user-friendly import/export
-  - SQLite: For database persistence
-  - Binary: For efficient backup/restore operations
+- All models use Marshmallow (marshmallow-sqlalchemy) for serialization/deserialization
+- Supported serialization formats:
+  - JSON: For API interactions and settings storage (via Marshmallow)
+  - CSV: For user-friendly import/export (custom serializers)
+  - SQLite: For database persistence (via SQLAlchemy)
+  - Binary: For efficient backup/restore operations (custom serializers)
 
-### Serialization Features
+### Serialization Features & Requirements
+- Use marshmallow>=3.20.0 and marshmallow-sqlalchemy>=0.29.0
+- All models must have corresponding Marshmallow schemas
+- Schemas must inherit from a base schema class that provides common functionality
+- Validation rules must be defined in schemas, not models
+- Support for nested relationships and complex data types
+- Built-in data validation and error handling
+- Type coercion and data cleaning
+- Custom field validators for business logic
+
+### Schema Design Principles
+- One schema per model for basic operations
+- Additional specialized schemas for specific use cases (e.g., import/export)
+- Strict validation by default with optional relaxed modes
+- Clear error messages for validation failures
+- Support for partial updates and field selection
+- Proper handling of date/time fields and UUIDs
 - Type safety and validation during serialization/deserialization
 - Schema versioning for backward compatibility
 - Custom serializers for complex types (UUID, datetime)

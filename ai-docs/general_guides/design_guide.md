@@ -16,11 +16,33 @@ Separation of Concerns: Strictly adhere to an Model-View-Controller (MVC) or Mod
 - Data Display: Use QTableView with a custom QAbstractTableModel for displaying database query results, ensuring efficient and reactive data binding.
 - Resource Management: Ensure all resources, especially database connections, are managed properly during application shutdown.
 
-3. Database & ORM Guidelines (SQLite + SQLAlchemy)
+3. Database, ORM, and Serialization Guidelines
+### Database (SQLite + SQLAlchemy)
 - File Location: The SQLite database file (.db) must be stored in a cross-platform location (e.g., the user's application data folder) or bundled as a data file in the PyInstaller build process. DO NOT hardcode the path.
 - Session Management: Use SQLAlchemy's Sessionmaker to manage database sessions. Every block of database code (e.g., a query or an update) should use a session in a try...finally block to ensure it is correctly closed or rolled back and a context manager.
 - Transactions: Wrap data modification operations (INSERT, UPDATE, DELETE) within explicit transactions to maintain data integrity.
 - Initial Data: Include a function to check if the database file exists; if not, create it and populate it with initial schema/data using SQLAlchemy's Base.metadata.create_all(engine).
+
+### Serialization (Marshmallow)
+- Schema Organization: All schemas must be organized in a `schemas` module, with clear separation between model schemas and specialized schemas.
+- Inheritance: Use a base schema class that provides common functionality (e.g., safe loading, error handling).
+- Validation Rules: 
+  - Define all validation rules in schema classes, not models
+  - Use marshmallow's built-in validators where possible
+  - Create custom validators for complex business rules
+  - Include clear error messages for all validation failures
+- Type Safety:
+  - Use strict type checking and coercion
+  - Handle date/time fields consistently with proper formats
+  - Support UUID fields with proper serialization
+- Error Handling:
+  - Provide both strict and relaxed validation modes
+  - Use custom error messages that are user-friendly
+  - Handle nested validation errors properly
+- Performance:
+  - Cache schema instances where appropriate
+  - Use schema-level options to optimize serialization
+  - Consider partial loading for large datasets
 
 4. Packaging and Distribution
 - PyInstaller Spec: When generating the build command or spec file (.spec), ensure the SQLite database file and any PySide/Qt plugins are correctly included using the --add-data or datas= array in the spec file.

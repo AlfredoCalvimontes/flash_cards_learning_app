@@ -1,0 +1,20 @@
+{
+    "workbench.colorCustomizations": {
+        "sash.hoverBorder": "#6790d7",
+        "statusBar.background": "#541c94",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#493fbe",
+        "statusBarItem.remoteBackground": "#441eb7",
+        "statusBarItem.remoteForeground": "#e7e7e7"
+    },
+    "peacock.color": "#be3fcc",
+    "github.copilot.chat.pullRequestDescriptionGeneration.instructions": [
+        { "file": "ai-docs/specific_guides/pull_request_guide.md" },
+    ],
+    "github.copilot.chat.reviewSelection.instructions": [
+        { "file": "ai-docs/specific_guides/code_review_guide.md" },
+    ],
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        { "file": "ai-docs/specific_guides/commit_message_guide.md" },
+    ]
+}

@@ -57,10 +57,10 @@ Reference Documents:
 - [x] Write comprehensive tests for scheduling logic
 
 ### 2.3 Database Initialization
-- [ ] Create database/init_db.py
-- [ ] Implement table creation script
-- [ ] Add database migration support
-- [ ] Write database initialization tests
+- [x] Create database/init_db.py
+- [x] Implement table creation script
+- [x] Add database migration support
+- [x] Write database initialization tests
 
 ## Phase 3: Core Business Logic
 ### 3.1 Scheduling Engine

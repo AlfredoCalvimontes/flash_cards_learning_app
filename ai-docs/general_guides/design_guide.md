@@ -36,6 +36,7 @@ Separation of Concerns: Strictly adhere to an Model-View-Controller (MVC) or Mod
   - Use strict type checking and coercion
   - Handle date/time fields consistently with proper formats
   - Support UUID fields with proper serialization
+  - Use marshmallow-enum for Enum field serialization
 - Error Handling:
   - Provide both strict and relaxed validation modes
   - Use custom error messages that are user-friendly

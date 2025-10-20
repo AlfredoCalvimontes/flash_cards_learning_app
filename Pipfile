@@ -7,6 +7,7 @@ name = "pypi"
 marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 flash-cards-learning-app = {file = ".", editable = true}
+marshmallow-enum = "==1.5.1"
 
 [dev-packages]
 

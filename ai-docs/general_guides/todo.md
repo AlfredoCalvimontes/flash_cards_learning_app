@@ -47,14 +47,14 @@ Reference Documents:
   - [x] timestamps and category relation
   - [x] serialization methods
 - [x] Implement Category model with serialization
-- [ ] Add unit tests for models and serialization
-- [ ] Create serialization format migration tools
+- [x] Add unit tests for models and serialization
+- [x] Create serialization format migration tools
 
 ### 2.2 Schedule Models
-- [ ] Implement Schedule model with all frequency modes
-- [ ] Add ScheduledEvent model
-- [ ] Create Settings model
-- [ ] Write comprehensive tests for scheduling logic
+- [x] Implement Schedule model with all frequency modes
+- [x] Add ScheduledEvent model
+- [x] Create Settings model
+- [x] Write comprehensive tests for scheduling logic
 
 ### 2.3 Database Initialization
 - [ ] Create database/init_db.py

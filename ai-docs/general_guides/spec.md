@@ -11,6 +11,9 @@ A Windows desktop application for flash card learning, packaged as a standalone 
 - SQLAlchemy 2.0+ - ORM and database operations
 - SQLite3 - Database engine
 - PyInstaller - Application packaging
+- marshmallow - Data serialization/deserialization framework
+- marshmallow-sqlalchemy - SQLAlchemy model serialization support
+- marshmallow-enum - Enum field serialization support
 
 ### Development Dependencies
 - pytest - Testing framework

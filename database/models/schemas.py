@@ -3,27 +3,31 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, Optional, Set, Type, TypeVar
+from typing import Any, Dict, Generator, Set, TypeVar
 
-from marshmallow import fields, validate, post_load, pre_load, ValidationError
+from marshmallow import EXCLUDE, fields, validate, post_load, pre_load, ValidationError
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from packaging import version
 
-from core.serialization.json import UUIDField, VersionedSchema
+from core.serialization.json import UUIDField
+from core.serialization.schema_version import SchemaVersionMixin
 from database.models.base import BaseModel
 from database.models.category import Category
 from database.models.flash_card import FlashCard
+from database.models.settings import Settings
 
 
 T = TypeVar('T', bound=BaseModel)
 
 
-class BaseModelSchema(VersionedSchema):
+class BaseModelSchema(SQLAlchemyAutoSchema, SchemaVersionMixin):
     """Base schema for all database models with common fields and behaviors."""
     
     class Meta:
         """Schema metadata."""
         load_instance = True
         include_relationships = True
+        unknown = EXCLUDE  # Exclude unknown fields
     
     # Common fields for all models
     uuid = UUIDField(dump_only=True)
@@ -34,23 +38,7 @@ class BaseModelSchema(VersionedSchema):
     updated_at = fields.DateTime(dump_only=True)
     schema_version = fields.String(dump_only=True)
     
-    @contextmanager
-    def session_context(self) -> Generator:
-        """Context manager for schema session handling.
-        
-        Usage:
-            with schema.session_context():
-                result = schema.load(data)
-        
-        Yields:
-            None
-        """
-        session = getattr(self, '_session', None)
-        try:
-            yield
-        finally:
-            if session:
-                self._session = None
+    # Session handling is now done directly through schema.load(data, session=session)
     
     @pre_load
     def validate_schema_version(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
@@ -73,11 +61,22 @@ class BaseModelSchema(VersionedSchema):
         current = version.parse(self.__version__)
         incoming = version.parse(schema_ver)
         
-        # Major version must match, minor version must be <= current
-        if (incoming.major != current.major or 
-            incoming.minor > current.minor):
+        # If incoming major version is greater -> newer (breaking)
+        if incoming.major > current.major:
             raise ValidationError(
-                f"Schema version {schema_ver} is incompatible with current version {self.__version__}"
+                f"Data schema version {schema_ver} is newer than supported {self.__version__}"
+            )
+
+        # If incoming major is less -> older (potentially unsupported)
+        if incoming.major < current.major:
+            raise ValidationError(
+                f"Data schema version {schema_ver} is older than supported {self.__version__}"
+            )
+
+        # Same major: ensure incoming minor is not greater than current minor
+        if incoming.minor > current.minor:
+            raise ValidationError(
+                f"Data schema version {schema_ver} is newer than supported {self.__version__}"
             )
         
         return data
@@ -100,7 +99,9 @@ class FlashCardSchema(BaseModelSchema):
         """Schema metadata."""
         model = FlashCard
         include_relationships = True
+        include_fk = True
         # Only include fields marked with init=True in constructor
+        load_instance = True
         constructor_fields = ["name", "question", "answer", "category_uuid"]
         
     __version__ = "1.0.0"  # Initial schema version
@@ -187,6 +188,8 @@ class CategorySchema(BaseModelSchema):
         """Schema metadata."""
         model = Category
         include_relationships = True
+        include_fk = True
+        load_instance = True
         # Only include fields marked with init=True in constructor
         constructor_fields = ["name", "priority"]
         
@@ -273,4 +276,29 @@ class CategorySchema(BaseModelSchema):
         lambda: FlashCardSchema(exclude=("category_uuid",)), 
         many=True, 
         dump_only=True
+    )
+
+
+class SettingsSchema(BaseModelSchema):
+    """Schema for serializing/deserializing Settings models."""
+
+    class Meta:
+        """Schema metadata."""
+        model = Settings
+        load_instance = True
+        constructor_fields = ["setting_key", "setting_value"]
+        
+    __version__ = "1.0.0"  # Initial schema version
+    
+    # Override BaseModel uuid field since Settings uses setting_key as primary key
+    uuid = None
+    
+    # Fields
+    setting_key = fields.String(
+        required=True,
+        validate=validate.Length(min=1, max=100)
+    )
+    setting_value = fields.Dict(
+        required=True,
+        validate=validate.Length(min=1, error="Setting value cannot be empty")
     )

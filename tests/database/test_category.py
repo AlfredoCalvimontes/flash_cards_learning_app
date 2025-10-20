@@ -1,7 +1,7 @@
 """Unit tests for Category model and schema."""
 
 import pytest
-from datetime import datetime, timezone
+from datetime import datetime
 from uuid import UUID
 
 from database.models.category import Category
@@ -101,9 +101,7 @@ class TestCategorySchema:
             "name": "New Category",
             "priority": 5,
         }
-        schema._session = db_session  # Set session for context manager
-        with schema.session_context():
-            result = schema.load(data)
+        result = schema.load(data, session=db_session)
 
         assert isinstance(result, Category)
         assert result.name == "New Category"
@@ -112,25 +110,20 @@ class TestCategorySchema:
     def test_deserialize_invalid_data(self, db_session):
         """Test validation errors for invalid data."""
         schema = CategorySchema()
-        schema._session = db_session  # Set session for context manager
-        
         # Test missing required fields
         with pytest.raises(ValidationError) as exc_info:
-            with schema.session_context():
-                schema.load({})
+            schema.load({}, session=db_session)
         assert "name" in exc_info.value.messages
         assert "priority" in exc_info.value.messages
 
         # Test invalid priority
         with pytest.raises(ValidationError) as exc_info:
-            with schema.session_context():
-                schema.load({"name": "Test", "priority": 0})
+            schema.load({"name": "Test", "priority": 0}, session=db_session)
         assert "priority" in exc_info.value.messages
 
         # Test invalid name length
         with pytest.raises(ValidationError) as exc_info:
-            with schema.session_context():
-                schema.load({"name": "", "priority": 1})
+            schema.load({"name": "", "priority": 1}, session=db_session)
         assert "name" in exc_info.value.messages
 
     def test_schema_version_handling(self, db_session):
@@ -143,12 +136,10 @@ class TestCategorySchema:
         assert result.get("schema_version") == schema.__version__
 
         # Test incompatible version
-        schema._session = db_session  # Set session for context manager
         with pytest.raises(ValidationError) as exc_info:
-            with schema.session_context():
-                schema.load({
-                    "schema_version": "999.0.0", 
-                    "name": "Test", 
-                    "priority": 1
-                })
+            schema.load({
+                "schema_version": "999.0.0", 
+                "name": "Test", 
+                "priority": 1
+            }, session=db_session)
         assert "Data schema version 999.0.0 is newer than supported 1.0.0" in str(exc_info.value)

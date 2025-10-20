@@ -1,5 +1,6 @@
 """Test fixtures and configuration for database tests."""
 
+from datetime import datetime, timezone
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -53,8 +54,8 @@ def sample_category(db_session: Session, request: pytest.FixtureRequest) -> Cate
     Returns:
         Category instance
     """
-    # Create a unique name using the test name
-    unique_name = f"Test Category - {request.node.name}"
+    # Create a unique name using the test name and a timestamp
+    unique_name = f"Test Category - {request.node.name} - {datetime.now(timezone.utc).isoformat()}"
     
     category = Category(
         name=unique_name,

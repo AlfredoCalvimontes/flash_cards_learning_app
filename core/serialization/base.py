@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, TypeVar
 from marshmallow import Schema, ValidationError
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
+from core.serialization.schema_version import SchemaVersionMixin
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from database.models.base import BaseModel
@@ -51,10 +52,8 @@ class BaseSchema(Schema):
             return None
 
 
-class BaseModelSchema(SQLAlchemyAutoSchema):
+class BaseModelSchema(SQLAlchemyAutoSchema, SchemaVersionMixin):
     """Base schema class for SQLAlchemy models."""
-    
-    __version__ = "1.0.0"  # Schema version for migration support
 
     class Meta:
         """Schema metadata configuration."""

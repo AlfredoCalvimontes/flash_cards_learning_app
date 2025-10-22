@@ -166,7 +166,7 @@ Export/import schedule settings as part of DB or as JSON
 ## 6. Selection Algorithm
 - Weighted random selection:
   - `weight = (category_priority ^ alpha) * (difficulty ^ beta)`
-  - Default: alpha=1.5, beta=1.0 (confirmed values)
+  - Default: alpha=0.7, beta=0.4 (confirmed values)
   - alpha controls category priority influence
   - beta controls difficulty influence
   - Higher priority/difficulty = more frequent

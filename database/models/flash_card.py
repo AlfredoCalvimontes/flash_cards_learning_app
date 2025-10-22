@@ -98,6 +98,38 @@ class FlashCard(BaseModel):
         """
         return f"FlashCard: {self.name} (Difficulty: {self.difficulty})"
     
+    def calculate_weight(self) -> float:
+        """
+        Calculate the selection weight for this card.
+        
+        The weight is calculated using the formula:
+        weight = (category_priority ^ category_priority_weight) * (difficulty ^ card_difficulty_weight)
+        
+        Args:
+            category_priority_weight: Exponent for category priority influence.
+                If None, uses value from config (default 0.7)
+            card_difficulty_weight: Exponent for difficulty influence.
+                If None, uses value from config (default 0.4)
+            
+        Returns:
+            Calculated weight as a float
+        """
+        from core.config import load_config
+        
+        # Get weights from config if not provided
+        config = load_config()
+        category_priority_weight = config['CATEGORY_PRIORITY_WEIGHT']
+        card_difficulty_weight = config['CARD_DIFFICULTY_WEIGHT']
+        if not self.category:
+            raise ValueError("Card must have an associated category to calculate weight")
+            
+        # We know the weights are not None at this point
+        assert category_priority_weight is not None
+        assert card_difficulty_weight is not None
+        
+        # Calculate using the formula: (priority^category_priority_weight) * (difficulty^card_difficulty_weight)
+        return (float(self.category.priority) ** category_priority_weight) * (float(self.difficulty) ** card_difficulty_weight)
+    
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp to current UTC time."""
         self.updated_at = datetime.now(timezone.utc)

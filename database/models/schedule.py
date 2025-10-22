@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from enum import Enum, unique
 from typing import TYPE_CHECKING, Optional, List
 from uuid import UUID
 
-from sqlalchemy import CheckConstraint, Enum as SQLEnum, ForeignKey, Integer, String, event
+from sqlalchemy import CheckConstraint, Enum as SQLEnum, ForeignKey, Integer, String, event, and_
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.models.base import BaseModel
@@ -316,3 +316,40 @@ class ScheduledEvent(BaseModel):
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp to current UTC time."""
         self.updated_at = datetime.now(timezone.utc)
+        
+    @classmethod
+    def is_time_slot_available(
+        cls,
+        session,
+        target_datetime: datetime,
+        buffer_minutes: int = 20
+    ) -> bool:
+        """Check if a time slot is available for scheduling.
+        
+        Checks if there are any scheduled events within the buffer period
+        around the target datetime. Default buffer is 20 minutes (±10 minutes).
+        
+        Args:
+            session: SQLAlchemy session to use for querying
+            target_datetime: The datetime to check for availability
+            buffer_minutes: Total buffer window in minutes (default 20)
+                          Half before and half after target_datetime
+            
+        Returns:
+            bool: True if no events exist within the buffer window
+        """
+        # Calculate the buffer window
+        half_buffer = buffer_minutes // 2
+        window_start = target_datetime - timedelta(minutes=half_buffer)
+        window_end = target_datetime + timedelta(minutes=half_buffer)
+        
+        # Query for any events in the time window
+        conflict_exists = session.query(cls).filter(
+            and_(
+                cls.scheduled_datetime >= window_start,
+                cls.scheduled_datetime <= window_end,
+                cls.status != EventStatus.IGNORED  # Ignore events that were skipped
+            )
+        ).first() is not None
+        
+        return not conflict_exists
